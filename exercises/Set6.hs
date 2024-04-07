@@ -170,7 +170,10 @@ instance Eq RationalNumber where
 -- Hint: Remember the function gcd?
 
 simplify :: RationalNumber -> RationalNumber
-simplify p = todo
+simplify (RationalNumber x y)
+  | gd > 1 = simplify (RationalNumber (x `div` gd) (y `div` gd))
+  | otherwise = RationalNumber x y
+    where gd = gcd x y
 
 ------------------------------------------------------------------------------
 -- Ex 10: implement the typeclass Num for RationalNumber. The results
@@ -191,12 +194,12 @@ simplify p = todo
 --   signum (RationalNumber 0 2)             ==> RationalNumber 0 1
 
 instance Num RationalNumber where
-  p + q = todo
-  p * q = todo
-  abs q = todo
-  signum q = todo
-  fromInteger x = todo
-  negate q = todo
+  (RationalNumber a1 a2) + (RationalNumber b1 b2) = simplify (RationalNumber ((a1*b2) + (a2*b1)) (a2*b2))
+  (RationalNumber a1 a2) * (RationalNumber b1 b2) = simplify (RationalNumber (a1*b1) (a2*b2))
+  abs (RationalNumber a1 a2)                      = (RationalNumber (abs a1) (abs a2))
+  signum (RationalNumber a1 a2)                   = (RationalNumber (signum a1) (signum a2))
+  fromInteger x                                   = (RationalNumber x 1)
+  negate (RationalNumber a1 a2)                   = (RationalNumber (-1*a1) a2)
 
 ------------------------------------------------------------------------------
 -- Ex 11: a class for adding things. Define a class Addable with a
@@ -211,6 +214,17 @@ instance Num RationalNumber where
 --   add [1,2] [3,4]        ==>  [1,2,3,4]
 --   add zero [True,False]  ==>  [True,False]
 
+class Addable a where
+  zero :: a
+  add :: a -> a -> a
+
+instance Addable Integer where
+  zero = 0
+  add x y = x + y
+
+instance Addable [a] where
+  zero = []
+  add x y = x++y
 
 ------------------------------------------------------------------------------
 -- Ex 12: cycling. Implement a type class Cycle that contains a
