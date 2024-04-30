@@ -26,7 +26,11 @@ import Mooc.Todo
 -- Otherwise return "Ok."
 
 workload :: Int -> Int -> String
-workload nExercises hoursPerExercise = todo
+workload nExercises hoursPerExercise
+  | total > 100 = "Holy moly!"
+  | total < 10  = "Piece of cake!"
+  | otherwise   = "Ok."
+    where total = nExercises * hoursPerExercise
 
 ------------------------------------------------------------------------------
 -- Ex 2: Implement the function echo that builds a string like this:
@@ -39,7 +43,9 @@ workload nExercises hoursPerExercise = todo
 -- Hint: use recursion
 
 echo :: String -> String
-echo = todo
+echo str
+ | length str == 0 = ""
+ | otherwise = str ++ ", " ++ echo (tail str)
 
 ------------------------------------------------------------------------------
 -- Ex 3: A country issues some banknotes. The banknotes have a serial
@@ -52,7 +58,8 @@ echo = todo
 -- are valid.
 
 countValid :: [String] -> Int
-countValid = todo
+countValid xs = length (filter check xs)
+  where check str = (str !! 2 == str !! 4) || (str !! 3 == str !! 5)
 
 ------------------------------------------------------------------------------
 -- Ex 4: Find the first element that repeats two or more times _in a
@@ -64,7 +71,9 @@ countValid = todo
 --   repeated [1,2,1,2,3,3] ==> Just 3
 
 repeated :: Eq a => [a] -> Maybe a
-repeated = todo
+repeated [] = Nothing
+repeated (x:[]) = Nothing
+repeated (x:y:xs) = if x == y then Just x else repeated (y:xs)
 
 ------------------------------------------------------------------------------
 -- Ex 5: A laboratory has been collecting measurements. Some of the
@@ -86,7 +95,12 @@ repeated = todo
 --     ==> Left "no data"
 
 sumSuccess :: [Either String Int] -> Either String Int
-sumSuccess = todo
+sumSuccess xs
+  | length values > 0 = Right (sum values)
+  | otherwise = Left "no data"
+  where rightInts :: [Either String Int] -> [Int]
+        rightInts xs = [x | Right x <- xs ]
+        values = rightInts xs
 
 ------------------------------------------------------------------------------
 -- Ex 6: A combination lock can either be open or closed. The lock
@@ -108,30 +122,33 @@ sumSuccess = todo
 --   isOpen (open "0000" (lock (changeCode "0000" (open "1234" aLock)))) ==> True
 --   isOpen (open "1234" (lock (changeCode "0000" (open "1234" aLock)))) ==> False
 
-data Lock = LockUndefined
+data Lock = Lock String Bool
   deriving Show
 
 -- aLock should be a locked lock with the code "1234"
 aLock :: Lock
-aLock = todo
+aLock = Lock "1234" True
 
 -- isOpen returns True if the lock is open
 isOpen :: Lock -> Bool
-isOpen = todo
+isOpen (Lock _ open) = not open
 
 -- open tries to open the lock with the given code. If the code is
 -- wrong, nothing happens.
 open :: String -> Lock -> Lock
-open = todo
+open input (Lock code locked) 
+ | input == code  = (Lock code False) 
+ | otherwise      = (Lock code locked)
 
 -- lock closes a lock. If the lock is already closed, nothing happens.
 lock :: Lock -> Lock
-lock = todo
+lock (Lock code locked) = Lock code True
 
 -- changeCode changes the code of an open lock. If the lock is closed,
 -- nothing happens.
 changeCode :: String -> Lock -> Lock
-changeCode = todo
+changeCode input (Lock code False) = Lock input False
+changeCode input lock = lock
 
 ------------------------------------------------------------------------------
 -- Ex 7: Here's a type Text that just wraps a String. Implement an Eq
@@ -149,6 +166,9 @@ changeCode = todo
 data Text = Text String
   deriving Show
 
+instance Eq Text where
+  (Text s1) == (Text s2) = filter (notSpace) s1 == filter (notSpace) s2
+    where notSpace c = not(isSpace c)
 
 ------------------------------------------------------------------------------
 -- Ex 8: We can represent functions or mappings as lists of pairs.
@@ -182,7 +202,11 @@ data Text = Text String
 --       ==> [("a",1),("b",2)]
 
 compose :: (Eq a, Eq b) => [(a,b)] -> [(b,c)] -> [(a,c)]
-compose = todo
+compose [] _  = []
+compose _ []  = []
+compose (x:xs) ys = case lookup (snd x) ys of
+  Just value -> ((fst x), value):compose xs ys
+  Nothing -> compose xs ys
 
 ------------------------------------------------------------------------------
 -- Ex 9: Reorder a list using a list of indices.
